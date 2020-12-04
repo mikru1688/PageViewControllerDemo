@@ -33,21 +33,19 @@ class PageViewController: UIPageViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        delegate = self
+        dataSource = self
+        
         // 依 storyboard ID 生成 viewController 並加到要用來顯示 pageViewController 畫面的陣列裡
-        self.viewControllerList.append(self.getViewController(withStoryboardID: "FirstPageViewController"))
-        self.viewControllerList.append(self.getViewController(withStoryboardID: "SecondPageViewController"))
-        self.viewControllerList.append(self.getViewController(withStoryboardID: "ThirdPageViewController"))
-        
-        self.delegate = self
-        self.dataSource = self
-        
+        viewControllerList.append(getViewController(withStoryboardID: "FirstPageViewController"))
+        viewControllerList.append(getViewController(withStoryboardID: "SecondPageViewController"))
+        viewControllerList.append(getViewController(withStoryboardID: "ThirdPageViewController"))
+                
         // 設定 pageViewControoler 的首頁
-        self.setViewControllers([self.viewControllerList.first!], direction: UIPageViewControllerNavigationDirection.forward, animated: true, completion: nil)
-    }
-
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
+        setViewControllers([viewControllerList.first!], direction: UIPageViewControllerNavigationDirection.forward, animated: true, completion: nil)
+        
+        // 設定 pageControl 的總頁數
+        pageViewControllerDelegate?.pageViewController(self, didUpdateNumberOfPage: viewControllerList.count)
     }
     
     /// 依 storybyardID 取得 viewController
@@ -57,19 +55,9 @@ class PageViewController: UIPageViewController {
     fileprivate func getViewController(withStoryboardID storyboardID: String) -> UIViewController {
         return UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: storyboardID)
     }
-
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destinationViewController.
-        // Pass the selected object to the new view controller.
-    }
-    */
-
 }
 
+// MARK: UIPageViewControllerDataSource
 extension PageViewController: UIPageViewControllerDataSource {
     
     /// 上一頁
@@ -81,13 +69,13 @@ extension PageViewController: UIPageViewControllerDataSource {
     func pageViewController(_ pageViewController: UIPageViewController, viewControllerBefore viewController: UIViewController) -> UIViewController? {
         
         // 取得當前頁數的 index(未翻頁前)
-        let currentIndex: Int =  self.viewControllerList.index(of: viewController)!
+        let currentIndex = viewControllerList.index(of: viewController)!
         
         // 設定上一頁的 index
-        let priviousIndex: Int = currentIndex - 1
+        let priviousIndex = currentIndex - 1
         
         // 判斷上一頁的 index 是否小於 0，若小於 0 則停留在當前的頁數
-        return priviousIndex < 0 ? nil : self.viewControllerList[priviousIndex]
+        return priviousIndex < 0 ? nil : viewControllerList[priviousIndex]
     }
     
     /// 下一頁
@@ -99,17 +87,17 @@ extension PageViewController: UIPageViewControllerDataSource {
     func pageViewController(_ pageViewController: UIPageViewController, viewControllerAfter viewController: UIViewController) -> UIViewController? {
         
         // 取得當前頁數的 index(未翻頁前)
-        let currentIndex: Int =  self.viewControllerList.index(of: viewController)!
+        let currentIndex = viewControllerList.index(of: viewController)!
         
         // 設定下一頁的 index
-        let nextIndex: Int = currentIndex + 1
+        let nextIndex = currentIndex + 1
         
         // 判斷下一頁的 index 是否大於總頁數，若大於則停留在當前的頁數
-        return nextIndex > self.viewControllerList.count - 1 ? nil : self.viewControllerList[nextIndex]
+        return nextIndex > viewControllerList.count - 1 ? nil : viewControllerList[nextIndex]
     }
-    
 }
 
+// MARK: UIPageViewControllerDelegate
 extension PageViewController: UIPageViewControllerDelegate {
     
     /// 切換完頁數觸發的 func
@@ -122,11 +110,11 @@ extension PageViewController: UIPageViewControllerDelegate {
     func pageViewController(_ pageViewController: UIPageViewController, didFinishAnimating finished: Bool, previousViewControllers: [UIViewController], transitionCompleted completed: Bool) {
         
         // 取得當前頁數的 viewController
-        let currentViewController: UIViewController = (self.viewControllers?.first)!
+        let currentViewController = (viewControllers?.first)!
         
         // 取得當前頁數的 index
-        let currentIndex: Int =  self.viewControllerList.index(of: currentViewController)!
+        let currentIndex = viewControllerList.index(of: currentViewController)!
         
-        self.pageViewControllerDelegate?.pageViewController(self, didUpdatePageIndex: currentIndex)
+        pageViewControllerDelegate?.pageViewController(self, didUpdatePageIndex: currentIndex)
     }
 }
